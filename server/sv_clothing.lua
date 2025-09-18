@@ -7,7 +7,7 @@ RegisterServerEvent('rsg-appearance:server:saveOutfit', function(newClothes, isM
     local skinData = MySQL.query.await('SELECT clothes FROM playerskins WHERE citizenid = ?', { citizenid })
 
     local newClothes = newClothes or {}
-    local currentClothes = json.decode(skinData[1]?.clothes) or {}
+    local currentClothes = json.decode(skinData[1].clothes) or {}
     local price = CalculatePrice(newClothes, currentClothes, isMale)
 
     if Player.Functions.RemoveMoney('cash', price, 'buy-clothes') then
