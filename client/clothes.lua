@@ -37,10 +37,10 @@ function OpenClothingMenu()
     local elements = {}
 
     for v, k in pairsByKeys(RSG.MenuElements) do
-        elements[#elements + 1] = { label = k.label or v, value = v, category = v, desc = image:format(v) .. "<br><br>" .. Divider .. "<br> " .. locale('clothing_menu.category_desc'), }
+        elements[#elements + 1] = { label = k.label or v, value = v, category = v, desc = image:format(k.label) .. "<br><br>" .. Divider .. "<br> " .. "clothing options for this category", }
     end
     if not (IsInCharCreation or Skinkosong) then
-        local descLayout = GetDescriptionLayout({ img = "menu_icon_tick", desc = locale('clothing_menu.confirm_purhcase') })
+        local descLayout = GetDescriptionLayout({ img = "menu_icon_tick", desc = 'Confirm purchase' })
         elements[#elements + 1] = { label = RSG.Label.save or "Save", value = "save", desc = descLayout }
     end
     MenuData.Open('default', GetCurrentResourceName(), 'clothing_store_menu',
@@ -52,17 +52,17 @@ function OpenClothingMenu()
                 menu.close()
                 destory()
                 local alert = lib.alertDialog({
-                    header = locale('save_outfit_1'),
+                    header = 'Save Outfit',
                     centered = true,
                     cancel = true,
                 })
                 local ClothesHash = ConvertCacheToHash(ClothesCache)
                 local isMale = IsPedMale(PlayerPedId())
                 if alert == 'confirm' then
-                    local input = lib.inputDialog(locale('save_outfit_2_header'), {
+                    local input = lib.inputDialog('Save Outfit', {
                         {
                             type = 'input',
-                            label = locale('save_outfit_2_input_label'),
+                            label = 'Outfit Name',
                             required = true,
                         },
                     })
@@ -493,7 +493,7 @@ end)
 local Cloakroom = GetRandomIntInRange(0, 0xffffff)
 
 function OpenCloakroom()
-    local str = locale('cloack_room_prompt_button')
+    local str = 'Cloak Room'
     CloakPrompt = PromptRegisterBegin()
     PromptSetControlAction(CloakPrompt, RSG.OpenKey)
     str = CreateVarString(10, 'LITERAL_STRING', str)

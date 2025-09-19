@@ -2,28 +2,30 @@ RegisterServerEvent('rsg-appearance:server:saveOutfit', function(newClothes, isM
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
-        
+
     local citizenid = Player.PlayerData.citizenid
     local skinData = MySQL.query.await('SELECT clothes FROM playerskins WHERE citizenid = ?', { citizenid })
 
     local newClothes = newClothes or {}
-    local currentClothes = json.decode(skinData[1].clothes) or {}
+    local currentClothes = json.decode(skinData[1]?.clothes) or {}
     local price = CalculatePrice(newClothes, currentClothes, isMale)
 
-    if Player.Functions.RemoveMoney('cash', price, 'buy-clothes') then
+    if Player.Functions.RemoveMoney('bloodmoney', price, 'buy-clothes') then
         MySQL.execute('UPDATE playerskins SET clothes = @clothes WHERE citizenid = @citizenid', {
             ['@citizenid'] = citizenid,
             ['@clothes'] = json.encode(newClothes),
         })
         if outfitName then
-            MySQL.query.await('INSERT INTO playeroutfit (citizenid, name, clothes) VALUES (@citizenid, @name, @clothes)', {
-                ['@citizenid'] = citizenid,
-                ['@name'] = outfitName,
-                ['@clothes'] = json.encode(newClothes),
-            })
+            MySQL.query.await('INSERT INTO playeroutfit (citizenid, name, clothes) VALUES (@citizenid, @name, @clothes)',
+                {
+                    ['@citizenid'] = citizenid,
+                    ['@name'] = outfitName,
+                    ['@clothes'] = json.encode(newClothes),
+                })
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, { title = locale('insufficient_funds.title'), description = locale('insufficient_funds.description'), type = 'error', duration = 5000 })
+        TriggerClientEvent('ox_lib:notify', src,
+            { title = 'Insufficient Funds', description = 'you don\'t have enough bloodmoney', type = 'error', duration = 5000 })
     end
 end)
 
@@ -45,7 +47,7 @@ AddEventHandler('rsg-appearance:server:DeleteOutfit', function(name)
     local _name = name
     local Player = RSGCore.Functions.GetPlayer(src)
     local citizenid = Player.PlayerData.citizenid
-    MySQL.Async.fetchAll('DELETE FROM playeroutfit WHERE citizenid = ? AND name =  ?', {citizenid, _name})
+    MySQL.Async.fetchAll('DELETE FROM playeroutfit WHERE citizenid = ? AND name =  ?', { citizenid, _name })
 end)
 
 lib.callback.register('rsg-appearance:server:LoadClothes', function(source)
@@ -64,12 +66,13 @@ end)
 lib.callback.register('rsg-appearance:server:getOutfits', function(source)
     local Player = RSGCore.Functions.GetPlayer(source)
     local outfit = {}
-    local Result = MySQL.query.await('SELECT * FROM playeroutfit WHERE citizenid=@citizenid', {['@citizenid'] = Player.PlayerData.citizenid})
+    local Result = MySQL.query.await('SELECT * FROM playeroutfit WHERE citizenid=@citizenid',
+        { ['@citizenid'] = Player.PlayerData.citizenid })
 
     for i = 1, #Result do
         Result[i].clothes = json.decode(Result[i].clothes)
         Result[i].name = Result[i].name
-        outfit[#outfit+1] = Result[i]
+        outfit[#outfit + 1] = Result[i]
     end
 
     return outfit
